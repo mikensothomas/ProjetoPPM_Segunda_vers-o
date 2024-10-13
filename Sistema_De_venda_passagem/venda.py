@@ -5,20 +5,17 @@ import time
 import json
 from faker import Faker
 
-# Inicializa o gerador de dados fake
 fake = Faker('pt_BR')
 
-# Inicializa a fila
 fila = queue.Queue()
 
-# Lock para proteger a seção crítica
+# seção crítica
 lock = threading.Lock()
 
-# Função para gerar dados de passagem (produtor)
-def gerar_demanda():
+def produtor():
     while True:
         with lock:
-            for _ in range(20):  # Gerar 20 demandas a cada 3 segundos
+            for _ in range(20):
                 dados_passagem = {
                     "nome": fake.name(),
                     "cpf": fake.cpf(),
@@ -26,32 +23,29 @@ def gerar_demanda():
                     "hora": fake.time(),
                     "assento": random.randint(1, 100)
                 }
-                # Imprimir dados verticalmente
                 print("Demanda gerada:")
                 for chave, valor in dados_passagem.items():
                     print(f"{chave}: {valor}")
-                print("-" * 20)  # Separador para cada demanda
+                print("-" * 20)
 
                 json_dados = json.dumps(dados_passagem)
                 fila.put(json_dados)
-        time.sleep(3)  # Espera 3 segundos para gerar mais demandas
+        time.sleep(3)
 
-# Função para processar as demandas da fila (consumidor)
-def consumir_demanda():
+def consumidor():
     while True:
         with lock:
-            for _ in range(10):  # Consumir 10 demandas a cada 3 segundos
+            for _ in range(10):
                 if not fila.empty():
                     dados = fila.get()
                     fila.task_done()
                     print(f"Demanda consumida: {dados}")
-        time.sleep(3)  # Espera 3 segundos para consumir mais demandas
+        time.sleep(3)
 
-# Programa principal
 if __name__ == "__main__":
-    # Cria e inicia as threads dos produtores e consumidores
-    thread_produtor = threading.Thread(target=gerar_demanda)
-    thread_consumidor = threading.Thread(target=consumir_demanda)
+    # Cria e inicia
+    thread_produtor = threading.Thread(target=produtor)
+    thread_consumidor = threading.Thread(target=consumidor)
 
     thread_produtor.start()
     thread_consumidor.start()
