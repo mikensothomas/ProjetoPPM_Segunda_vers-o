@@ -26,9 +26,14 @@ def gerar_demanda():
                     "hora": fake.time(),
                     "assento": random.randint(1, 100)
                 }
+                # Imprimir dados verticalmente
+                print("Demanda gerada:")
+                for chave, valor in dados_passagem.items():
+                    print(f"{chave}: {valor}")
+                print("-" * 20)  # Separador para cada demanda
+
                 json_dados = json.dumps(dados_passagem)
                 fila.put(json_dados)
-                print(f"Demanda gerada: {json_dados}")
         time.sleep(3)  # Espera 3 segundos para gerar mais demandas
 
 # Função para processar as demandas da fila (consumidor)
